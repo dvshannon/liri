@@ -106,16 +106,57 @@ function spotify() {
             });
 }
 
+// Title of the movie.
+// Year the movie came out.
+// IMDB Rating of the movie.
+// Rotten Tomatoes Rating of the movie.
+// Country where the movie was produced.
+// Language of the movie.
+// Plot of the movie.
+// Actors in the movie.
+function movie(){
+    const queryUrl = "http://www.omdbapi.com/?t=" + entertainment + "&y=&plot=short&apikey=trilogy";
+
+    if(!entertainment) {
+        entertainment = console.log("If you haven't watched 'Mr. Nobody', then you should: <http://www.imdb.com/title/tt0485947/>");
+        console.log("It's on Netflix!");
+    } 
+    axios.get(queryUrl).then(
+        function(response) {
+            const showMovieData = [
+                'Title: ' + response.data.Title,
+                'Release Year: ' + response.data.Year,
+                'Ratings: ' + response.data.imbdRating,
+                'Released: ' + response.data.Released,
+                'Language: ' + response.data.Language,
+                'Plot: ' + response.data.Plot,
+                'Actors: ' + response.data.Actors,
+                'Country: ' + response.data.Country
+            ].join('\n\n');
+
+            // Append showData and the divider to log.txt, print showData to the console
+            fs.appendFile("log.txt", showMovieData + divider, function(err) {
+            if (err)
+              throw err;
+            console.log(showMovieData);
+          });
+        }
+          
+          );
+        }
 function runActions(){
     switch(actions){
-      case "concert-this":
-          shows();
+        case "concert-this":
+            shows();
         break;
-      case "spotify-this-song":
-          spotify();
+        case "spotify-this-song":
+            spotify();
+        break;
+        case 'movie-this':
+            movie();
         break;
 
-      default:
+        default:
         console.log("Search for something..");
     }
 }
