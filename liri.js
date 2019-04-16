@@ -20,11 +20,11 @@ const fs = require('fs');
 
 const divider = '\n-------------------\n\n'
 const nodeArg = process.argv;
-const actions = nodeArg[2];
-const entertainment = process.argv.slice(3).join(" ");
+let actions = nodeArg[2];
+let entertainment = process.argv.slice(3).join(" ");
 
 function shows() {
-        fs.appendFileSync('log.txt', entertainment + divider, function(error){
+        fs.appendFileSync('log.txt', entertainment + divider + '\n', function(error){
             if(error) {
                 console.log(error);
             }
@@ -64,11 +64,10 @@ function shows() {
 
                     date = moment(date).format('MM/DD/YYYY');
                     console.log('Date: ' + date);
-
                     fs.appendFileSync('log.txt', 'Date: ' + date + divider, function(error){
                         if (error) {
                             console.log(error);
-                        }
+                            }
                     })
                 }
             }
@@ -82,12 +81,8 @@ function spotify() {
         entertainment = 'All the Small Things';
     }
     spotify.search({ type: 'track', query: entertainment, limit: 5 }, function (err, data){
-            if (err){
-                console.log('Error occurred: ' + err);
-                return;
-            }
-            const songs = data.tracks.items;
-
+            let songs = data.tracks.items;
+            // Append 'Artist' and the divider to log.txt, print 'Artist' to the console
             for (var i = 0; i < 4; i++){
                 console.log(songs[i].name);
                 const artistArr = songs[i].artists;
@@ -96,13 +91,19 @@ function spotify() {
                 for (var x = 0; x < artistArr.length; x++){
                 artists.push(artistArr[i].name);
                 }
-                console.log("Artists: " + artists.join(", "));
+                console.log('Artists: ' + artists.join(', '));
                 if (songs[i].preview_url){
-                console.log("Preview: " + songs[i].preview_url);
+                console.log('Preview: ' + songs[i].preview_url);
                 }
-                console.log("Album: " + songs[i].album.name);
+                console.log('Album: ' + songs[i].album.name);
                 console.log(divider);
                 }
+
+            // Append 'Artist' and the divider to log.txt, print 'Artist' to the console
+            fs.appendFile('log.txt', 'Artist: ' + artists[i].name + divider, function(err) {
+                if (err)
+                  throw err;
+              });
             });
 }
 
@@ -134,8 +135,8 @@ function movie(){
                 'Country: ' + response.data.Country
             ].join('\n\n');
 
-            // Append showData and the divider to log.txt, print showData to the console
-            fs.appendFile("log.txt", showMovieData + divider, function(err) {
+            // Append showMovieData and the divider to log.txt, print showMovieData to the console
+            fs.appendFile('log.txt', showMovieData + divider + '\n', function(err) {
             if (err)
               throw err;
             console.log(showMovieData);
@@ -144,12 +145,14 @@ function movie(){
           
           );
         }
+
+// runs the functions based off of the action performed
 function runActions(){
     switch(actions){
-        case "concert-this":
+        case 'concert-this':
             shows();
         break;
-        case "spotify-this-song":
+        case 'spotify-this-song':
             spotify();
         break;
         case 'movie-this':
@@ -157,9 +160,26 @@ function runActions(){
         break;
 
         default:
-        console.log("Search for something..");
+        console.log('Search for something..');
     }
 }
-    runActions();
+
+if(actions == 'do-what-it-says') {
+    // reads the random.txt file
+    fs.readFile('random.txt', 'utf8', function(err, data){
+        if (err) {
+            console.log(err);
+        }
+        // split items and stores in array
+        let readArr = data.split(',');
+        actions = readArr[0];
+        entertainment = readArr[1];
+        // re-display content as array
+        runActions();
+
+    })
+}
+
+runActions();
 // testing shows
 // return shows()
