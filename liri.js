@@ -6,11 +6,14 @@ const keys = require("./keys.js");
 
 const request = require('./node_modules/request');
 // npm spotify
-// const spotify = new Spotify(keys.spotify);
+const Spotify = require('node-spotify-api');
+
+// npm axios
+const axios = require('axios');
 
 // npm moment
-// let = require('moment');
-// moment().format();
+let moment = require('moment');
+moment().format();
 
 // npm fs
 const fs = require('fs');
@@ -21,9 +24,6 @@ const actions = nodeArg[2];
 const entertainment = process.argv.slice(3).join(" ");
 
 function shows() {
-    switch(actions) {
-        case 'concert-this':
-
         fs.appendFileSync('log.txt', entertainment + divider, function(error){
             if(error) {
                 console.log(error);
@@ -38,11 +38,11 @@ function shows() {
                  const data = JSON.parse(body);
 
                 for (let i = 0; i < data.length; i++) {
-                    console.log('Venue: ' + data[i].venue.name + '\n', function (error){
+                    console.log('Venue: ' + data[i].venue.name + '\n'), function (error){
                         if (error) {
                             console.log(error);
                         }
-                    });
+                    };
                     if (data[i].venue.region === '') {
                         console.log('Location: ' + data[i].venue.city + ', ' + data[i].venue.country);
                         // add to log.txt
@@ -60,7 +60,7 @@ function shows() {
                     }
 
                     // formatted date of show
-                    const date = data[i].datetime;
+                    let date = data[i].datetime;
 
                     date = moment(date).format('MM/DD/YYYY');
                     console.log('Date: ' + date);
@@ -72,14 +72,53 @@ function shows() {
                     })
                 }
             }
+            console.log(divider);
         })
-        console.log(divider);
-        break;
-
-        
-    }
-
 }
 
+function spotify() {
+    const spotify = new Spotify(keys.spotify);
+    if(!entertainment) {
+        entertainment = 'All the Small Things';
+    }
+    spotify.search({ type: 'track', query: entertainment, limit: 5 }, function (err, data){
+            if (err){
+                console.log('Error occurred: ' + err);
+                return;
+            }
+            const songs = data.tracks.items;
+
+            for (var i = 0; i < 4; i++){
+                console.log(songs[i].name);
+                const artistArr = songs[i].artists;
+                const artists = [];
+
+                for (var x = 0; x < artistArr.length; x++){
+                artists.push(artistArr[i].name);
+                }
+                console.log("Artists: " + artists.join(", "));
+                if (songs[i].preview_url){
+                console.log("Preview: " + songs[i].preview_url);
+                }
+                console.log("Album: " + songs[i].album.name);
+                console.log(divider);
+                }
+            });
+}
+
+function runActions(){
+    switch(actions){
+      case "concert-this":
+          shows();
+        break;
+      case "spotify-this-song":
+          spotify();
+        break;
+
+      default:
+        console.log("Search for something..");
+    }
+}
+    runActions();
 // testing shows
-// return shows();
+// return shows()
